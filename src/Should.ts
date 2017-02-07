@@ -1,27 +1,92 @@
 import { Exception } from './Exception';
-export class Should {
-    static equal(original: string, expected: string) {
-        if (original !== expected) {
-            throw new Exception(`Expected ${original} to equal ${expected}`)
+import { utils } from 'realm-utils';
+
+
+export class ShouldInstance {
+
+    constructor(private obj?: any) {
+
+    }
+    public equal(expected: any) {
+        if (this.obj !== expected) {
+            throw new Exception(`Expected ${this.obj} to equal ${expected}`)
         }
+        return this;
     }
 
-    static notEqual(original: string, expected: string) {
-        if (original === expected) {
-            throw new Exception(`Expected ${original} to not equal ${expected}`)
+    public notEqual(expected: string) {
+        if (this.obj === expected) {
+            throw new Exception(`Expected ${this.obj} to not equal ${expected}`)
         }
+        return this;
     }
 
-    static lengthBeEqual(original: any, expected: number) {
-        if (!original || original.length === undefined) {
-            throw new Exception(`Expected ${original} to have length object. Found undefined`)
+
+    public match(exp: RegExp) {
+        this.beString();
+        if (!exp.test(this.obj)) {
+            throw new Exception(`Expected ${this.obj} to match ${exp}`);
         }
-        if (original.length !== expected) {
-            throw new Exception(`Expected ${original} to have length of ${expected}. Got ${original.length}`)
-        }
+        return this;
     }
 
-    static throwException(fn: any) {
+    public okay() {
+        if (this.obj === undefined || this.obj === null) {
+            throw new Exception(`Expected ${this.obj} to be not undefined or null`);
+        }
+        return this;
+    }
+
+    public haveLength() {
+        this.okay();
+        if (this.length === undefined) {
+            throw new Exception(`Expected ${this.obj} to have length, got undefined`)
+        }
+        return this;
+    }
+
+    public length(expected: number) {
+        this.haveLength();
+
+        if (this.obj.length !== expected) {
+            throw new Exception(`Expected ${this.obj} to have length of ${expected}. Got ${this.obj.length}`)
+        }
+        return this;
+    }
+
+    public lengthGreater(expected: number) {
+        this.haveLength();
+
+        if (this.obj.length <= expected) {
+            throw new Exception(`Expected ${this.obj} length be greater than ${expected}. Got ${this.obj.length}`)
+        }
+        return this;
+    }
+    public lengthGreaterEqual(expected: number) {
+        this.haveLength();
+        if (!(this.obj.length >= expected)) {
+            throw new Exception(`Expected ${this.obj} length be greater or equal than ${expected}. Got ${this.obj.length}`)
+        }
+        return this;
+    }
+
+    public lengthLess(expected: number) {
+        this.haveLength();
+        if (!(this.obj.length < expected)) {
+            throw new Exception(`Expected ${this.obj} length be less than ${expected}. Got ${this.obj.length}`)
+        }
+        return this;
+    }
+
+    public lengthLessEqual(expected: number) {
+        this.haveLength();
+        if (!(this.obj.length <= expected)) {
+            throw new Exception(`Expected ${this.obj} length be less or equal than ${expected}. Got ${this.obj.length}`)
+        }
+        return this;
+    }
+
+    public throwException(fn: any) {
         try {
             fn();
 
@@ -33,7 +98,7 @@ export class Should {
         }
     }
 
-    static deepEqual(original: any, expected: any) {
+    public deepEqual(expected: any) {
         function $deepEqual(a, b) {
             if ((typeof a == 'object' && a != null) &&
                 (typeof b == 'object' && b != null)) {
@@ -53,12 +118,69 @@ export class Should {
                 return a === b;
             }
         }
-        const result = $deepEqual(original, expected);
+        const result = $deepEqual(this.obj, expected);
         if (result === false) {
             throw new Exception(`Expected the original
-${JSON.stringify(original, null, 2)} 
+${JSON.stringify(this.obj, null, 2)} 
 to be deep equal to 
 ${JSON.stringify(expected, null, 2)}`)
         }
+        return this;
     }
+
+    /**
+     * Instance checkes ******************************
+     */
+    public beString() {
+        if (!utils.isString(this.obj)) {
+            throw new Exception(`Expected ${this.obj} to be a string, Got ${typeof this.obj}`);
+        }
+        return this;
+    }
+
+    public beArray() {
+        if (!utils.isArray(this.obj)) {
+            throw new Exception(`Expected ${this.obj} to be an array, Got ${typeof this.obj}`);
+        }
+        return this;
+    }
+
+    public beObject() {
+        if (!utils.isObject(this.obj)) {
+            throw new Exception(`Expected ${this.obj} to be an obj, Got ${typeof this.obj}`);
+        }
+        return this;
+    }
+
+    public bePlainObject() {
+        if (!utils.isPlainObject(this.obj)) {
+            throw new Exception(`Expected ${this.obj} to be a plain object, Got ${typeof this.obj}`);
+        }
+        return this;
+    }
+
+    public bePromise() {
+        if (!utils.isPromise(this.obj)) {
+            throw new Exception(`Expected ${this.obj} to be a promise, Got ${typeof this.obj}`);
+        }
+        return this;
+    }
+
+    public beFunction() {
+        if (!utils.isFunction(this.obj)) {
+            throw new Exception(`Expected ${this.obj} to be a function, Got ${typeof this.obj}`);
+        }
+        return this;
+    }
+
+    public beNumber() {
+        if (typeof this.obj !== "number") {
+            throw new Exception(`Expected ${this.obj} to be a number, Got ${typeof this.obj}`);
+        }
+        return this;
+    }
+}
+
+export const should = (obj: any) => {
+    return new ShouldInstance(obj);
 }
