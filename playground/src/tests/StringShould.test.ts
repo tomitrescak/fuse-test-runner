@@ -2,36 +2,37 @@ import { should } from "fuse-test";
 
 export class StringShouldPass {
     shouldCheckString1() {
-        should.equal("a", "a")
+        should("a").equal("a");
     }
 
     shouldThrowStringEqual() {
-        should.throwException(() => {
-            should.equal("a", "b");
+        should().throwException(() => {
+            should("a").equal("b");
         });
     }
 
     shouldThrowStringNotEqual() {
-        should.throwException(() => {
-            should.notEqual("a", "a");
+        should().throwException(() => {
+            should("a").notEqual("a");
         });
     }
 
-    shouldLengthBeOkay() {
-        should.lengthBeEqual("123", 3);
+    shouldMatch() {
+        should("foobar").match(/foo/)
     }
 
-    shouldLengthBeNotOkay() {
-        should.throwException(() => {
-            should.lengthBeEqual("123", 4);
+    shouldNotMatch() {
+        should().throwException(() => {
+            should("foobar").match(/boo/)
         });
     }
 
-    shouldDissalowWrongObjectInLengthCheck() {
-        should.throwException(() => {
-            should.lengthBeEqual({}, 4);
-        });
-    }
+
+    // shouldDissalowWrongObjectInLengthCheck() {
+    //     should.throwException(() => {
+    //         should.lengthBeEqual({}, 4);
+    //     });
+    // }
 
 
 
