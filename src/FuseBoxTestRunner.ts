@@ -4,7 +4,11 @@ import { Exception } from './Exception';
 import { Reporter } from './Reporter';
 
 declare const FuseBox: any;
+const systemProps = ["before", "beforeAll", "afterAll", 'beforeEach', 'after', 'afterEach'];
 
+const $isSystemProp = (name: string) => {
+    return systemProps.indexOf(name) > -1
+}
 const $isPromise = (item) => {
     return item
         && typeof item.then === 'function' &&
@@ -65,7 +69,7 @@ export class FuseBoxTestRunner {
         }
         for (let i = 0; i < str.length; i++) {
             let char = str.charAt(i);
-            if (char === "_") {
+            if (char === "_" || char === " ") {
                 if (word.length) {
                     addWord();
                     word = [];
@@ -87,18 +91,22 @@ export class FuseBoxTestRunner {
         return sentence.charAt(0).toUpperCase() + sentence.slice(1);
     }
 
-
-
-
     private extractInstructions(obj: any) {
         let props = Object.getOwnPropertyNames(obj.constructor.prototype);
         let instructions = {
-            methods: []
+            methods: [],
+            suites: {}
         };
-        let systemProps = ["before", 'beforeEach', 'after', 'afterEach'];
+
+        if (utils.isPlainObject(obj.suites)) {
+            instructions.suites = obj.suites;
+        }
+
         // collecting props and checking for setters
         for (var i = 1; i < props.length; i++) {
             let propertyName = props[i];
+
+
             if (systemProps.indexOf(propertyName) == -1) {
                 instructions.methods.push(propertyName);
             } else {
@@ -183,30 +191,28 @@ export class FuseBoxTestRunner {
                 fn: this.createEvalFunction(instance, "before")
             });
         }
-        if (instructions["beforeAll"]) {
-            tasks.push({
-                method: "beforeAll",
-                fn: this.createEvalFunction(instance, "before")
-            });
-        }
+
         instructions.methods.forEach(methodName => {
-            if (instructions["beforeAll"]) {
+            if (!$isSystemProp(methodName)) {
+                if (instructions["beforeEach"]) {
+                    tasks.push({
+                        method: "beforeEach",
+                        fn: this.createEvalFunction(instance, "beforeEach")
+                    });
+                }
                 tasks.push({
-                    method: "beforeAll",
-                    fn: this.createEvalFunction(instance, "before")
+                    method: methodName,
+                    title: this.convertToReadableName(methodName),
+                    fn: this.createEvalFunction(instance, methodName)
                 });
+                if (instructions["afterEach"]) {
+                    tasks.push({
+                        method: "afterEach",
+                        fn: this.createEvalFunction(instance, "afterEach")
+                    });
+                }
             }
-            tasks.push({
-                method: methodName,
-                title: this.convertToReadableName(methodName),
-                fn: this.createEvalFunction(instance, methodName)
-            });
-            if (instructions["afterAll"]) {
-                tasks.push({
-                    method: "afterAll",
-                    fn: this.createEvalFunction(instance, "afterAll")
-                });
-            }
+
         });
         if (instructions["after"]) {
             tasks.push({
@@ -231,7 +237,9 @@ export class FuseBoxTestRunner {
                     if (!data.success) {
                         this.failed = true;
                     }
-                    this.reporter.testCase(report);
+                    if (!$isSystemProp(item.method)) {
+                        this.reporter.testCase(report);
+                    }
                     return resolve(report);
                 }).catch((e) => {
                     let error: Exception;

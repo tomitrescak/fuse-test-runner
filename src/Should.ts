@@ -37,24 +37,25 @@ export class ShouldInstance {
         return this;
     }
 
-    public haveLength() {
+    public haveLength(expected?: number) {
         this.okay();
-        if (this.length === undefined) {
+        if (this.obj.length === undefined) {
             throw new Exception(`Expected ${this.obj} to have length, got undefined`)
         }
-        return this;
-    }
-
-    public length(expected: number) {
-        this.haveLength();
-
-        if (this.obj.length !== expected) {
-            throw new Exception(`Expected ${this.obj} to have length of ${expected}. Got ${this.obj.length}`)
+        if (expected !== undefined) {
+            if (this.obj.length !== expected) {
+                throw new Exception(`Expected ${this.obj} to have length of ${expected}. Got ${this.obj.length}`)
+            }
         }
         return this;
     }
 
-    public lengthGreater(expected: number) {
+    /**
+     * ************************************************************
+     * HAVE LENGTH 
+     * ************************************************************
+     */
+    public haveLengthGreater(expected: number) {
         this.haveLength();
 
         if (this.obj.length <= expected) {
@@ -62,7 +63,7 @@ export class ShouldInstance {
         }
         return this;
     }
-    public lengthGreaterEqual(expected: number) {
+    public haveLengthGreaterEqual(expected: number) {
         this.haveLength();
         if (!(this.obj.length >= expected)) {
             throw new Exception(`Expected ${this.obj} length be greater or equal than ${expected}. Got ${this.obj.length}`)
@@ -70,7 +71,7 @@ export class ShouldInstance {
         return this;
     }
 
-    public lengthLess(expected: number) {
+    public haveLengthLess(expected: number) {
         this.haveLength();
         if (!(this.obj.length < expected)) {
             throw new Exception(`Expected ${this.obj} length be less than ${expected}. Got ${this.obj.length}`)
@@ -78,7 +79,7 @@ export class ShouldInstance {
         return this;
     }
 
-    public lengthLessEqual(expected: number) {
+    public haveLengthLessEqual(expected: number) {
         this.haveLength();
         if (!(this.obj.length <= expected)) {
             throw new Exception(`Expected ${this.obj} length be less or equal than ${expected}. Got ${this.obj.length}`)
@@ -129,7 +130,8 @@ ${JSON.stringify(expected, null, 2)}`)
     }
 
     /**
-     * Instance checkes ******************************
+     * BeChecks
+     * **************************************************************************************
      */
     public beString() {
         if (!utils.isString(this.obj)) {
@@ -176,6 +178,20 @@ ${JSON.stringify(expected, null, 2)}`)
     public beNumber() {
         if (typeof this.obj !== "number") {
             throw new Exception(`Expected ${this.obj} to be a number, Got ${typeof this.obj}`);
+        }
+        return this;
+    }
+
+    public beBoolean() {
+        if (typeof this.obj !== "boolean") {
+            throw new Exception(`Expected ${this.obj} to be a boolean, Got ${typeof this.obj}`);
+        }
+        return this;
+    }
+
+    public beUndefined() {
+        if (this.obj !== undefined) {
+            throw new Exception(`Expected ${this.obj} to be a undefined, Got ${typeof this.obj}`);
         }
         return this;
     }
