@@ -30,42 +30,40 @@ class ShouldInstance {
         }
         return this;
     }
-    haveLength() {
+    haveLength(expected) {
         this.okay();
-        if (this.length === undefined) {
+        if (this.obj.length === undefined) {
             throw new Exception_1.Exception(`Expected ${this.obj} to have length, got undefined`);
         }
-        return this;
-    }
-    length(expected) {
-        this.haveLength();
-        if (this.obj.length !== expected) {
-            throw new Exception_1.Exception(`Expected ${this.obj} to have length of ${expected}. Got ${this.obj.length}`);
+        if (expected !== undefined) {
+            if (this.obj.length !== expected) {
+                throw new Exception_1.Exception(`Expected ${this.obj} to have length of ${expected}. Got ${this.obj.length}`);
+            }
         }
         return this;
     }
-    lengthGreater(expected) {
+    haveLengthGreater(expected) {
         this.haveLength();
         if (this.obj.length <= expected) {
             throw new Exception_1.Exception(`Expected ${this.obj} length be greater than ${expected}. Got ${this.obj.length}`);
         }
         return this;
     }
-    lengthGreaterEqual(expected) {
+    haveLengthGreaterEqual(expected) {
         this.haveLength();
         if (!(this.obj.length >= expected)) {
             throw new Exception_1.Exception(`Expected ${this.obj} length be greater or equal than ${expected}. Got ${this.obj.length}`);
         }
         return this;
     }
-    lengthLess(expected) {
+    haveLengthLess(expected) {
         this.haveLength();
         if (!(this.obj.length < expected)) {
             throw new Exception_1.Exception(`Expected ${this.obj} length be less than ${expected}. Got ${this.obj.length}`);
         }
         return this;
     }
-    lengthLessEqual(expected) {
+    haveLengthLessEqual(expected) {
         this.haveLength();
         if (!(this.obj.length <= expected)) {
             throw new Exception_1.Exception(`Expected ${this.obj} length be less or equal than ${expected}. Got ${this.obj.length}`);
@@ -159,6 +157,18 @@ ${JSON.stringify(expected, null, 2)}`);
     beNumber() {
         if (typeof this.obj !== "number") {
             throw new Exception_1.Exception(`Expected ${this.obj} to be a number, Got ${typeof this.obj}`);
+        }
+        return this;
+    }
+    beBoolean() {
+        if (typeof this.obj !== "boolean") {
+            throw new Exception_1.Exception(`Expected ${this.obj} to be a boolean, Got ${typeof this.obj}`);
+        }
+        return this;
+    }
+    beUndefined() {
+        if (this.obj !== undefined) {
+            throw new Exception_1.Exception(`Expected ${this.obj} to be a undefined, Got ${typeof this.obj}`);
         }
         return this;
     }

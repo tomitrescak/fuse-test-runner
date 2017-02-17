@@ -60,4 +60,17 @@ export class TypeChecks {
     beNotNumber() {
         should().throwException(() => should("1").beNumber());
     }
+
+    beBoolean() {
+        should(true).beBoolean();
+    }
+    beNotBoolean() {
+        should().throwException(() => should("1").beBoolean());
+    }
+    beUndefined() {
+        should(undefined).beUndefined();
+    }
+    beNotUndefined() {
+        should().throwException(() => should("1").beUndefined());
+    }
 }
