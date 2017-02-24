@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const Exception_1 = require("./Exception");
 const realm_utils_1 = require("realm-utils");
 class ShouldInstance {

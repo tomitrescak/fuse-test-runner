@@ -1,4 +1,4 @@
-import { should } from "fuse-test";
+import { should } from "fuse-test-runner";
 
 export class TypeChecks {
 

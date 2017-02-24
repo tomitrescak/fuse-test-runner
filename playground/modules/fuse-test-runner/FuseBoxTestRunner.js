@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const Awaiting_1 = require("./Awaiting");
 const realm_utils_1 = require("realm-utils");
 const Exception_1 = require("./Exception");
@@ -50,6 +51,9 @@ class FuseBoxTestRunner {
         });
     }
     convertToReadableName(str) {
+        if (str.match(/\s+/)) {
+            return str;
+        }
         let prev;
         let word = [];
         let words = [];
@@ -148,6 +152,9 @@ class FuseBoxTestRunner {
         const report = {};
         this.reporter.startFile(filename);
         return realm_utils_1.each(moduleExports, (obj, key) => {
+            if (key[0] === "_") {
+                return;
+            }
             report[key] = {
                 title: this.convertToReadableName(key),
                 items: []
