@@ -94,7 +94,7 @@ gulp.task('build', function() {
 
 gulp.task("copy-to-dev-folder", () => {
     return gulp.src('dist/commonjs/**/*.js')
-        .pipe(gulp.dest('playground/modules/fuse-test'));
+        .pipe(gulp.dest('playground/modules/fuse-test-runner'));
 });
 
 

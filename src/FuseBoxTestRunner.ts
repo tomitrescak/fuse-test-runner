@@ -59,6 +59,9 @@ export class FuseBoxTestRunner {
     }
 
     protected convertToReadableName(str: string): string {
+        if (str.match(/\s+/)) {
+            return str;
+        }
         let prev;
         let word = [];
         let words = [];
@@ -165,12 +168,17 @@ export class FuseBoxTestRunner {
     public startFile(filename: string, moduleExports: any) {
         const report = {};
         this.reporter.startFile(filename);
+
         return each(moduleExports, (obj: any, key: string) => {
+            if (key[0] === "_") {
+                return;
+            }
             report[key] = {
                 title: this.convertToReadableName(key),
                 items: []
             }
             this.reporter.startClass(filename, report[key]);
+
             return this.createTasks(filename, key, obj).then(items => {
                 report[key].tasks = items
             }).then(() => {
