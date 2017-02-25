@@ -32,6 +32,13 @@ class ShouldInstance {
         }
         return this;
     }
+    notFindString(target) {
+        this.beString();
+        if (this.obj.indexOf(target) > -1) {
+            throw new Exception_1.Exception(`Expected ${this.obj} not to have ${target}`);
+        }
+        return this;
+    }
     okay() {
         if (this.obj === undefined || this.obj === null) {
             throw new Exception_1.Exception(`Expected ${this.obj} to be not undefined or null`);
@@ -123,6 +130,18 @@ class ShouldInstance {
 ${JSON.stringify(this.obj, null, 2)} 
 to be deep equal to 
 ${JSON.stringify(expected, null, 2)}`);
+        }
+        return this;
+    }
+    beTrue() {
+        if (this.obj !== true) {
+            throw new Exception_1.Exception(`Expected ${this.obj} to be true, got ${this.obj}`);
+        }
+        return this;
+    }
+    beFalse() {
+        if (this.obj !== false) {
+            throw new Exception_1.Exception(`Expected ${this.obj} to be false, got ${this.obj}`);
         }
         return this;
     }
