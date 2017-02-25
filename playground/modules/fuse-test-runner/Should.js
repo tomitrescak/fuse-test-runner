@@ -25,6 +25,13 @@ class ShouldInstance {
         }
         return this;
     }
+    findString(target) {
+        this.beString();
+        if (this.obj.indexOf(target) === -1) {
+            throw new Exception_1.Exception(`Expected ${this.obj} to have ${target}`);
+        }
+        return this;
+    }
     okay() {
         if (this.obj === undefined || this.obj === null) {
             throw new Exception_1.Exception(`Expected ${this.obj} to be not undefined or null`);

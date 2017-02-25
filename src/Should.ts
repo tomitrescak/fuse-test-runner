@@ -30,6 +30,14 @@ export class ShouldInstance {
         return this;
     }
 
+    public findString(target: string) {
+        this.beString();
+        if (this.obj.indexOf(target) === -1) {
+            throw new Exception(`Expected ${this.obj} to have ${target}`);
+        }
+        return this;
+    }
+
     public okay() {
         if (this.obj === undefined || this.obj === null) {
             throw new Exception(`Expected ${this.obj} to be not undefined or null`);
