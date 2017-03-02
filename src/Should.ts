@@ -22,6 +22,14 @@ export class ShouldInstance {
     }
 
 
+    public notMatch(exp: RegExp) {
+        this.beString();
+        if (exp.test(this.obj)) {
+            throw new Exception(`Expected ${this.obj} to match ${exp}`);
+        }
+        return this;
+    }
+
     public match(exp: RegExp) {
         this.beString();
         if (!exp.test(this.obj)) {
