@@ -235,6 +235,6 @@ ${JSON.stringify(expected, null, 2)}`)
     }
 }
 
-export const should = (obj: any) => {
+export const should = (obj?: any) => {
     return new ShouldInstance(obj);
 }
