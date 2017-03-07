@@ -233,6 +233,35 @@ ${JSON.stringify(expected, null, 2)}`)
         }
         return this;
     }
+
+    public beMap() {
+        if (this.obj instanceof Map === false) {
+            throw new Exception(`Expected ${this.obj} to be instanceof Map ${typeof this.obj}`);
+        }
+        return this;
+    }
+
+    public beSet() {
+        if (this.obj instanceof Set === false) {
+            throw new Exception(`Expected ${this.obj} to be instanceof Map ${typeof this.obj}`);
+        }
+        return this;
+    }
+
+
+    public beInstanceOf(obj: any) {
+        if (this.obj instanceof obj === false) {
+            throw new Exception(`Expected ${this.obj} to be instanceof ${obj}`);
+        }
+        return this;
+    }
+
+    public beOkay() {
+        if (this.obj === undefined || this.obj === null || this.obj === NaN) {
+            throw new Exception(`Expected ${this.obj} to be a not undefined | null | NaN, Got ${typeof this.obj}`);
+        }
+        return this;
+    }
 }
 
 export const should = (obj?: any) => {
