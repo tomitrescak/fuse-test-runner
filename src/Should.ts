@@ -7,6 +7,12 @@ export class ShouldInstance {
     constructor(private obj?: any) {
 
     }
+
+    public mutate(fn: any) {
+        this.obj = fn(this.obj);
+        return this;
+    }
+
     public equal(expected: any) {
         if (this.obj !== expected) {
             throw new Exception(`Expected ${this.obj} to equal ${expected}`)
