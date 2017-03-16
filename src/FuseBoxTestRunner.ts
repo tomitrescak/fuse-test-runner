@@ -48,13 +48,13 @@ export class FuseBoxTestRunner {
             if (utils.isPromise(reportResult)) {
                 reportResult.then(x => this.finish())
                     .catch(e => {
-                        console.error(e);
+                        console.error(e.stack || e);
                     })
             } else {
                 this.finish();
             }
         }).catch(e => {
-            console.log(e);
+            console.log(e.stack || e);
         });
     }
 
