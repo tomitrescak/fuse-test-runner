@@ -123,7 +123,7 @@ export class FuseBoxTestRunner {
 
 
     private hasCallback(func) {
-        return /^(function\s*)?([a-z0-9$_]+\s*)?\((.+)\)/.test(func.toString());
+        return /^(function\s*)?([a-zA-Z0-9$_]+\s*)?\((.+)\)/.test(func.toString());
     }
 
 
