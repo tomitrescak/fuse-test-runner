@@ -37,8 +37,7 @@ export class FuseBoxTestRunner {
     }
 
     public start() {
-        const testPattern = "*.test.js";
-        const tests = require(testPattern);
+        const tests = FuseBox.import("*.test.js");
         this.reporter.initialize(tests);
         return each(tests, (moduleExports: any, name: string) => {
             return this.startFile(name, moduleExports)
