@@ -22,7 +22,7 @@ export class FuseBoxTestRunner {
     private failed = false;
     constructor(opts: any) {
         let reporterPath = opts.reporterPath || "fuse-test-reporter";
-        let reportLib = FuseBox.import(reporterPath);
+        let reportLib = require(reporterPath);
 
         this.doExit = FuseBox.isServer && opts.exit === true;
 
@@ -37,7 +37,8 @@ export class FuseBoxTestRunner {
     }
 
     public start() {
-        const tests = FuseBox.import("*.test.js");
+        const testPattern = "*.test.js";
+        const tests = require(testPattern);
         this.reporter.initialize(tests);
         return each(tests, (moduleExports: any, name: string) => {
             return this.startFile(name, moduleExports)
