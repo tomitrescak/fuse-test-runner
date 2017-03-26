@@ -88,7 +88,7 @@ export class ShouldInstance {
     public haveLengthGreater(expected: number) {
         this.haveLength();
 
-        if (this.obj.length <= expected) {
+        if (this.obj.length < expected) {
             throw new Exception(`Expected ${this.obj} length be greater than ${expected}. Got ${this.obj.length}`)
         }
         return this;
