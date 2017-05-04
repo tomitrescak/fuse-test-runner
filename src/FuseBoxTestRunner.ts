@@ -2,6 +2,7 @@ import { Awaiting } from './Awaiting';
 import { each, utils } from 'realm-utils';
 import { Exception } from './Exception';
 import { Reporter } from './Reporter';
+import { TestConfig } from './Config';
 
 declare const FuseBox: any;
 const systemProps = ["before", "beforeAll", "afterAll", 'beforeEach', 'after', 'afterEach'];
@@ -14,6 +15,7 @@ const $isPromise = (item) => {
         && typeof item.then === 'function' &&
         typeof item.catch === 'function';
 }
+
 export class FuseBoxTestRunner {
     public tasks: any;
     public reporter: Reporter;
@@ -37,6 +39,7 @@ export class FuseBoxTestRunner {
     }
 
     public start() {
+        TestConfig.snapshotCalls = [];
         const tests = FuseBox.import("*.test.js");
         this.reporter.initialize(tests);
         return each(tests, (moduleExports: any, name: string) => {
@@ -236,6 +239,9 @@ export class FuseBoxTestRunner {
         let current = 0;
         return each(tasks, (item) => {
             return new Promise((resolve, reject) => {
+                TestConfig.currentTask = item;
+                TestConfig.currentTask.fileName = filename;
+                TestConfig.currentTask.className = className;
 
                 return item.fn().then((data) => {
                     let report = {

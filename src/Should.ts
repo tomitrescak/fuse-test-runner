@@ -1,11 +1,12 @@
 import { Exception } from './Exception';
 import { utils } from 'realm-utils';
-
+import { TestConfig } from './Config';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export class ShouldInstance {
 
     constructor(private obj?: any) {
-
     }
 
     public mutate(fn: any) {
@@ -32,6 +33,60 @@ export class ShouldInstance {
         this.beString();
         if (exp.test(this.obj)) {
             throw new Exception(`Expected ${this.obj} to match ${exp}`);
+        }
+        return this;
+    }
+
+    public matchSnapshot() {
+        const snapshotDir = path.resolve(TestConfig.snapshotDir);
+        const { currentTask, snapshotCalls } = TestConfig;
+        
+        var fileName = `${snapshotDir}/${currentTask.className}_snapshots.json`;
+        var snapshotCall = snapshotCalls.find(w => w.className === currentTask.className);
+
+        // we either overwrite existing file or append to it
+        if (snapshotCall == null) {                
+            snapshotCall = { className: currentTask.className, content: process.env.UPDATE_SNAPSHOTS ? {} : null, calls: [] };
+            snapshotCalls.push(snapshotCall);
+        } 
+
+        // find function
+        var call = snapshotCall.calls.find(w => w.name == currentTask.title);
+        if (call == null) {
+            call = { name: currentTask.title, calls: 1 }
+            snapshotCall.calls.push(call);
+        }
+
+        // we can update all snapshots or match against current one
+        if (process.env.UPDATE_SNAPSHOTS) {
+            // make sure snapshot dir exists
+            // TODO: save files to the location where tests are
+            // The problem here is that I do not know how to access the root of FuseBox project
+            try {
+                fs.statSync(snapshotDir);
+            } catch (ex) {
+                fs.mkdirSync(snapshotDir);
+            }
+
+            // add current task           
+            snapshotCall.content[currentTask.title + ' ' + call.calls++] = TestConfig.serializer(this.obj);
+            fs.writeFileSync(fileName, JSON.stringify(snapshotCall.content, null, 2));
+        } else {
+            // check if we have loaded the file
+            if (!snapshotCall.content) {
+                try {
+                    fs.statSync(fileName);
+                } catch (ex) {
+                    throw new Exception(`Snapshot file for ${currentTask.className} does not exist!`);
+                }
+                snapshotCall.content = JSON.parse(fs.readFileSync(fileName));
+            }
+
+            let snapshot = snapshotCall.content[currentTask.title + ' ' + call.calls ++];
+            let currentValue = TestConfig.serializer(this.obj);
+            if (snapshot !== currentValue) {
+                throw new Exception(`Expected ${snapshot} to match ${currentValue}`);
+            }
         }
         return this;
     }
