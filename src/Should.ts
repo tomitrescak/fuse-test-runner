@@ -39,6 +39,7 @@ export class ShouldInstance {
 
     public matchSnapshot() {
         const snapshotDir = path.resolve(TestConfig.snapshotDir);
+        if (!TestConfig.snapshotCalls) { TestConfig.snapshotCalls = [] };
         const { currentTask, snapshotCalls } = TestConfig;
         
         var fileName = `${snapshotDir}/${currentTask.className}_snapshots.json`;
@@ -77,7 +78,7 @@ export class ShouldInstance {
                 try {
                     fs.statSync(fileName);
                 } catch (ex) {
-                    throw new Exception(`Snapshot file for ${currentTask.className} does not exist!`);
+                    throw new Exception(`Snapshot file for ${currentTask.className} does not exist at '${fileName}'!`);
                 }
                 snapshotCall.content = JSON.parse(fs.readFileSync(fileName));
             }
