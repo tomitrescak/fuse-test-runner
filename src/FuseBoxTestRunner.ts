@@ -23,13 +23,16 @@ export class FuseBoxTestRunner {
     private doExit = false;
     private failed = false;
     constructor(opts: any) {
-        let reporterPath = opts.reporterPath || "fuse-test-reporter";
-        let reportLib = require(reporterPath);
+        
+        let reporterPath = opts.reporter || "fuse-test-reporter";
+        let reportLib = typeof(opts.reporter) === 'string' ? require(reporterPath) : opts.reporter;
 
         this.doExit = FuseBox.isServer && opts.exit === true;
 
         if (reportLib.default) {
             this.reporter = new Reporter(reportLib.default);
+        } else {
+            this.reporter = new Reporter(reportLib);
         }
     }
     public finish() {
@@ -39,8 +42,11 @@ export class FuseBoxTestRunner {
     }
 
     public start() {
-        TestConfig.snapshotCalls = [];
         const tests = FuseBox.import("*.test.js");
+        this.startTests(tests);
+    }
+
+    public startTests(tests: any) {
         this.reporter.initialize(tests);
         return each(tests, (moduleExports: any, name: string) => {
             return this.startFile(name, moduleExports)
@@ -178,7 +184,8 @@ export class FuseBoxTestRunner {
             }
             report[key] = {
                 title: this.convertToReadableName(key),
-                items: []
+                items: [],
+                cls: obj
             }
             this.reporter.startClass(filename, report[key]);
 
@@ -214,7 +221,9 @@ export class FuseBoxTestRunner {
                 tasks.push({
                     method: methodName,
                     title: this.convertToReadableName(methodName),
-                    fn: this.createEvalFunction(instance, methodName)
+                    fn: this.createEvalFunction(instance, methodName),
+                    instance,
+                    cls: obj
                 });
                 if (instructions["afterEach"]) {
                     tasks.push({

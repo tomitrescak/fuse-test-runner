@@ -39,6 +39,9 @@ export type Config = {
   serializer: (obj: any) => string;
   currentTask: Task;
   snapshotCalls: SnapshotItem[];
+  snapshotLoader(path: string, className: string): object;
+  onProcessSnapshots(taskName: string, snapshotName: string, current: string, expected: string);
+  snapshotExtension: string;
 }
 
 export const TestConfig: Config = {
@@ -47,5 +50,8 @@ export const TestConfig: Config = {
     return formatComponent(obj);
   },
   currentTask: null,
-  snapshotCalls: null
+  snapshotCalls: null,
+  snapshotLoader: null,
+  snapshotExtension: 'snap',
+  onProcessSnapshots: null
 }

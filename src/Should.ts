@@ -1,4 +1,4 @@
-import { Exception } from './Exception';
+import { Exception, SnapshotException } from './Exception';
 import { utils } from 'realm-utils';
 import { TestConfig } from './Config';
 import * as fs from 'fs';
@@ -39,10 +39,11 @@ export class ShouldInstance {
 
     public matchSnapshot() {
         const snapshotDir = path.resolve(TestConfig.snapshotDir);
+
         if (!TestConfig.snapshotCalls) { TestConfig.snapshotCalls = [] };
         const { currentTask, snapshotCalls } = TestConfig;
         
-        var fileName = `${snapshotDir}/${currentTask.className}_snapshots.json`;
+        var fileName = path.join(snapshotDir, `${currentTask.className}_snapshots.${TestConfig.snapshotExtension}`);
         var snapshotCall = snapshotCalls.find(w => w.className === currentTask.className);
 
         // we either overwrite existing file or append to it
@@ -73,20 +74,33 @@ export class ShouldInstance {
             snapshotCall.content[currentTask.title + ' ' + call.calls++] = TestConfig.serializer(this.obj);
             fs.writeFileSync(fileName, JSON.stringify(snapshotCall.content, null, 2));
         } else {
+            let currentValue = TestConfig.serializer(this.obj);
+
             // check if we have loaded the file
             if (!snapshotCall.content) {
-                try {
-                    fs.statSync(fileName);
-                } catch (ex) {
+                if (TestConfig.snapshotLoader != null) {
+                    snapshotCall.content = TestConfig.snapshotLoader(fileName, currentTask.className);
+                } else {
+                    try {
+                        fs.statSync(fileName);
+                        snapshotCall.content = JSON.parse(fs.readFileSync(fileName));
+                    } catch (ex) { }
+                }
+                if (!snapshotCall.content) {
                     throw new Exception(`Snapshot file for ${currentTask.className} does not exist at '${fileName}'!`);
                 }
-                snapshotCall.content = JSON.parse(fs.readFileSync(fileName));
+                
             }
 
-            let snapshot = snapshotCall.content[currentTask.title + ' ' + call.calls ++];
-            let currentValue = TestConfig.serializer(this.obj);
+            const name = currentTask.title + ' ' + call.calls ++;
+            let snapshot = snapshotCall.content[name];
+
+            if (TestConfig.onProcessSnapshots) {
+                TestConfig.onProcessSnapshots(currentTask.title, name, currentValue, snapshot);
+            }
+
             if (snapshot !== currentValue) {
-                throw new Exception(`Expected ${snapshot} to match ${currentValue}`);
+                throw new SnapshotException(`Expected ${snapshot} to match ${currentValue}`, snapshot, currentValue, name);
             }
         }
         return this;

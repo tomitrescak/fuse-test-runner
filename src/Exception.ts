@@ -7,3 +7,15 @@ export class Exception extends Error {
         super(message);
     }
 }
+
+export class SnapshotException extends Exception {
+    public expected: string;
+    public current: string;
+    public name: string;
+    constructor(public message: string, expected: string, current: string, name: string) {
+        super(message);
+        this.expected = expected;
+        this.current = current;
+        this.name = name;
+    }
+}
