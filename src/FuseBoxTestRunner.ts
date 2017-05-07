@@ -2,6 +2,7 @@ import { Awaiting } from './Awaiting';
 import { each, utils } from 'realm-utils';
 import { Exception } from './Exception';
 import { Reporter } from './Reporter';
+import { TestConfig } from './Config';
 
 declare const FuseBox: any;
 const systemProps = ["before", "beforeAll", "afterAll", 'beforeEach', 'after', 'afterEach'];
@@ -14,30 +15,46 @@ const $isPromise = (item) => {
         && typeof item.then === 'function' &&
         typeof item.catch === 'function';
 }
+
 export class FuseBoxTestRunner {
     public tasks: any;
     public reporter: Reporter;
     public startTime = new Date().getTime();
     private doExit = false;
     private failed = false;
+    private opts;
     constructor(opts: any) {
-        let reporterPath = opts.reporterPath || "fuse-test-reporter";
-        let reportLib = require(reporterPath);
+        this.opts = opts;
+
+        let reporterPath = opts.reporter || "fuse-test-reporter";
+        let reportLib = typeof(opts.reporter) === 'string' ? require(reporterPath) : opts.reporter;
 
         this.doExit = FuseBox.isServer && opts.exit === true;
 
         if (reportLib.default) {
             this.reporter = new Reporter(reportLib.default);
+        } else {
+            this.reporter = new Reporter(reportLib);
         }
     }
-    public finish() {
+    public async finish() {
+        if (this.opts.afterAll) {
+            await this.opts.afterAll(TestConfig, this);
+        }
         if (this.doExit) {
             process.exit(this.failed ? 1 : 0);
         }
     }
 
-    public start() {
+    public async start() {
         const tests = FuseBox.import("*.test.js");
+        if (this.opts.beforeAll) {
+            await this.opts.beforeAll(TestConfig, this);
+        }
+        return this.startTests(tests);
+    }
+
+    public startTests(tests: any) {
         this.reporter.initialize(tests);
         return each(tests, (moduleExports: any, name: string) => {
             return this.startFile(name, moduleExports)
@@ -175,7 +192,8 @@ export class FuseBoxTestRunner {
             }
             report[key] = {
                 title: this.convertToReadableName(key),
-                items: []
+                items: [],
+                cls: obj
             }
             this.reporter.startClass(filename, report[key]);
 
@@ -211,7 +229,9 @@ export class FuseBoxTestRunner {
                 tasks.push({
                     method: methodName,
                     title: this.convertToReadableName(methodName),
-                    fn: this.createEvalFunction(instance, methodName)
+                    fn: this.createEvalFunction(instance, methodName),
+                    instance,
+                    cls: obj
                 });
                 if (instructions["afterEach"]) {
                     tasks.push({
@@ -236,6 +256,9 @@ export class FuseBoxTestRunner {
         let current = 0;
         return each(tasks, (item) => {
             return new Promise((resolve, reject) => {
+                TestConfig.currentTask = item;
+                TestConfig.currentTask.fileName = filename;
+                TestConfig.currentTask.className = className;
 
                 return item.fn().then((data) => {
                     let report = {

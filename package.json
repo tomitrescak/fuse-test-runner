@@ -28,6 +28,7 @@
     "typescript": "^2.1.5"
   },
   "dependencies": {
+    "pretty-format": "^19.0.0",
     "realm-utils": "^1.0.7"
   }
 }
