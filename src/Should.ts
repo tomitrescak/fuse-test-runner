@@ -71,8 +71,8 @@ export class ShouldInstance {
             }
 
             // add current task   
+            snapshotCall.content[currentTask.title + ' ' + call.calls] = TestConfig.serializer(this.obj);
             if (!process.env.SNAPSHOT || currentTask.title.match(process.env.SNAPSHOT)) {    
-                snapshotCall.content[currentTask.title + ' ' + call.calls] = TestConfig.serializer(this.obj);
                 fs.writeFileSync(fileName, JSON.stringify(snapshotCall.content, null, 2));
             }
             call.calls++
