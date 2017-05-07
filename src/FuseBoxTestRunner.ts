@@ -22,8 +22,10 @@ export class FuseBoxTestRunner {
     public startTime = new Date().getTime();
     private doExit = false;
     private failed = false;
+    private opts;
     constructor(opts: any) {
-        
+        this.opts = opts;
+
         let reporterPath = opts.reporter || "fuse-test-reporter";
         let reportLib = typeof(opts.reporter) === 'string' ? require(reporterPath) : opts.reporter;
 
@@ -35,15 +37,21 @@ export class FuseBoxTestRunner {
             this.reporter = new Reporter(reportLib);
         }
     }
-    public finish() {
+    public async finish() {
+        if (this.opts.afterAll) {
+            await this.opts.afterAll(TestConfig, this);
+        }
         if (this.doExit) {
             process.exit(this.failed ? 1 : 0);
         }
     }
 
-    public start() {
+    public async start() {
         const tests = FuseBox.import("*.test.js");
-        this.startTests(tests);
+        if (this.opts.beforeAll) {
+            await this.opts.beforeAll(TestConfig, this);
+        }
+        return this.startTests(tests);
     }
 
     public startTests(tests: any) {
