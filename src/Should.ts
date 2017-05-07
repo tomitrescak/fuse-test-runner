@@ -70,9 +70,12 @@ export class ShouldInstance {
                 fs.mkdirSync(snapshotDir);
             }
 
-            // add current task           
-            snapshotCall.content[currentTask.title + ' ' + call.calls++] = TestConfig.serializer(this.obj);
-            fs.writeFileSync(fileName, JSON.stringify(snapshotCall.content, null, 2));
+            // add current task   
+            if (!process.env.SNAPSHOT || currentTask.title.match(process.env.SNAPSHOT)) {    
+                snapshotCall.content[currentTask.title + ' ' + call.calls] = TestConfig.serializer(this.obj);
+                fs.writeFileSync(fileName, JSON.stringify(snapshotCall.content, null, 2));
+            }
+            call.calls++
         } else {
             let currentValue = TestConfig.serializer(this.obj);
 
