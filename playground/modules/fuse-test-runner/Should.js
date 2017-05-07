@@ -2,9 +2,16 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const Exception_1 = require("./Exception");
 const realm_utils_1 = require("realm-utils");
+const Config_1 = require("./Config");
+const fs = require("fs");
+const path = require("path");
 class ShouldInstance {
     constructor(obj) {
         this.obj = obj;
+    }
+    mutate(fn) {
+        this.obj = fn(this.obj);
+        return this;
     }
     equal(expected) {
         if (this.obj !== expected) {
@@ -15,6 +22,69 @@ class ShouldInstance {
     notEqual(expected) {
         if (this.obj === expected) {
             throw new Exception_1.Exception(`Expected ${this.obj} to not equal ${expected}`);
+        }
+        return this;
+    }
+    notMatch(exp) {
+        this.beString();
+        if (exp.test(this.obj)) {
+            throw new Exception_1.Exception(`Expected ${this.obj} to match ${exp}`);
+        }
+        return this;
+    }
+    matchSnapshot() {
+        const snapshotDir = path.resolve(Config_1.TestConfig.snapshotDir);
+        if (!Config_1.TestConfig.snapshotCalls) {
+            Config_1.TestConfig.snapshotCalls = [];
+        }
+        ;
+        const { currentTask, snapshotCalls } = Config_1.TestConfig;
+        var fileName = path.join(snapshotDir, `${currentTask.className}_snapshots.${Config_1.TestConfig.snapshotExtension}`);
+        var snapshotCall = snapshotCalls.find(w => w.className === currentTask.className);
+        if (snapshotCall == null) {
+            snapshotCall = { className: currentTask.className, content: process.env.UPDATE_SNAPSHOTS ? {} : null, calls: [] };
+            snapshotCalls.push(snapshotCall);
+        }
+        var call = snapshotCall.calls.find(w => w.name == currentTask.title);
+        if (call == null) {
+            call = { name: currentTask.title, calls: 1 };
+            snapshotCall.calls.push(call);
+        }
+        if (process.env.UPDATE_SNAPSHOTS) {
+            try {
+                fs.statSync(snapshotDir);
+            }
+            catch (ex) {
+                fs.mkdirSync(snapshotDir);
+            }
+            snapshotCall.content[currentTask.title + ' ' + call.calls++] = Config_1.TestConfig.serializer(this.obj);
+            fs.writeFileSync(fileName, JSON.stringify(snapshotCall.content, null, 2));
+        }
+        else {
+            let currentValue = Config_1.TestConfig.serializer(this.obj);
+            if (!snapshotCall.content) {
+                if (Config_1.TestConfig.snapshotLoader != null) {
+                    snapshotCall.content = Config_1.TestConfig.snapshotLoader(fileName, currentTask.className);
+                }
+                else {
+                    try {
+                        fs.statSync(fileName);
+                        snapshotCall.content = JSON.parse(fs.readFileSync(fileName));
+                    }
+                    catch (ex) { }
+                }
+                if (!snapshotCall.content) {
+                    throw new Exception_1.Exception(`Snapshot file for ${currentTask.className} does not exist at '${fileName}'!`);
+                }
+            }
+            const name = currentTask.title + ' ' + call.calls++;
+            let snapshot = snapshotCall.content[name];
+            if (Config_1.TestConfig.onProcessSnapshots) {
+                Config_1.TestConfig.onProcessSnapshots(currentTask.title, name, currentValue, snapshot);
+            }
+            if (snapshot !== currentValue) {
+                throw new Exception_1.SnapshotException(`Expected ${snapshot} to match ${currentValue}`, snapshot, currentValue, name);
+            }
         }
         return this;
     }
@@ -59,7 +129,7 @@ class ShouldInstance {
     }
     haveLengthGreater(expected) {
         this.haveLength();
-        if (this.obj.length <= expected) {
+        if (this.obj.length < expected) {
             throw new Exception_1.Exception(`Expected ${this.obj} length be greater than ${expected}. Got ${this.obj.length}`);
         }
         return this;
@@ -196,6 +266,30 @@ ${JSON.stringify(expected, null, 2)}`);
     beUndefined() {
         if (this.obj !== undefined) {
             throw new Exception_1.Exception(`Expected ${this.obj} to be a undefined, Got ${typeof this.obj}`);
+        }
+        return this;
+    }
+    beMap() {
+        if (this.obj instanceof Map === false) {
+            throw new Exception_1.Exception(`Expected ${this.obj} to be instanceof Map ${typeof this.obj}`);
+        }
+        return this;
+    }
+    beSet() {
+        if (this.obj instanceof Set === false) {
+            throw new Exception_1.Exception(`Expected ${this.obj} to be instanceof Map ${typeof this.obj}`);
+        }
+        return this;
+    }
+    beInstanceOf(obj) {
+        if (this.obj instanceof obj === false) {
+            throw new Exception_1.Exception(`Expected ${this.obj} to be instanceof ${obj}`);
+        }
+        return this;
+    }
+    beOkay() {
+        if (this.obj === undefined || this.obj === null || this.obj === NaN) {
+            throw new Exception_1.Exception(`Expected ${this.obj} to be a not undefined | null | NaN, Got ${typeof this.obj}`);
         }
         return this;
     }

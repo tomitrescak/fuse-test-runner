@@ -7,3 +7,13 @@ class Exception extends Error {
     }
 }
 exports.Exception = Exception;
+class SnapshotException extends Exception {
+    constructor(message, expected, current, name) {
+        super(message);
+        this.message = message;
+        this.expected = expected;
+        this.current = current;
+        this.name = name;
+    }
+}
+exports.SnapshotException = SnapshotException;

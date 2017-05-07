@@ -80,9 +80,9 @@ gulp.task("dist-commonjs", () => {
 
 
 gulp.task("dist-reporter", () => {
-    // let result = gulp.src('src-reporter/**/*.ts')
-    //     .pipe(projectReporter());
-    // return result.js.pipe(gulp.dest('playground/modules/fuse-test-reporter'));
+    let result = gulp.src('src-reporter/**/*.ts')
+        .pipe(projectReporter());
+    return result.js.pipe(gulp.dest('playground/modules/fuse-test-reporter'));
 });
 
 

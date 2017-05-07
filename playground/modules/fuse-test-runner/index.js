@@ -4,3 +4,7 @@ var FuseBoxTestRunner_1 = require("./FuseBoxTestRunner");
 exports.FuseBoxTestRunner = FuseBoxTestRunner_1.FuseBoxTestRunner;
 var Should_1 = require("./Should");
 exports.should = Should_1.should;
+var Config_1 = require("./Config");
+exports.TestConfig = Config_1.TestConfig;
+var WallabyTransform_1 = require("./WallabyTransform");
+exports.wallabyFuseTestLoader = WallabyTransform_1.wallabyFuseTestLoader;
