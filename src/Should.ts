@@ -108,14 +108,30 @@ export class ShouldInstance {
                 let message = '';
                 var diff = jsdiff.diffChars(snapshot, currentValue);
                 diff.forEach(function (part) {
-                    // green for additions, red for deletions
-                    // grey for common parts
-                    if (part.added) {
-                        message += '+ ' + part.value + '\n';
-                    } else if (part.removed) {
-                        message += '+ ' + part.value + '\n';
-                    } else if (message) {
-                        message += '...';
+                    if (typeof window === 'undefined' || window.location == null || window.location.href == null || window.location.href == 'about:blank') {
+                        if (part.added) {
+                            message += '\x1b[32m' + part.value;
+                        }
+                        else if (part.removed) {
+                            message += '\x1b[31m' + part.value;
+                        }
+                        else if (message) {
+                            message += '\x1b[37m' + part.value.substring(0, 30) + '\n';
+                        } else {
+                            message += '\x1b[37m' + part.value.substring(part.value.length - 30);
+                        }
+                    } else {
+                        if (part.added) {
+                            message += '<span class="diffadded">' + part.value + '</span>';
+                        }
+                        else if (part.removed) {
+                            message += '<span class="diffremoved">' + part.value + '</span>';
+                        }
+                        else if (message) {
+                            message += part.value.substring(0, 30) + '<br />';
+                        } else {
+                            message += part.value.substring(part.value.length - 30);
+                        }
                     }
                 });
                 throw new SnapshotException(`Snapshots do not match: \n${message}`, snapshot, currentValue, name);
