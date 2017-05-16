@@ -3,6 +3,7 @@ import { utils } from 'realm-utils';
 import { TestConfig } from './Config';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as jsdiff from 'diff';
 
 export class ShouldInstance {
 
@@ -42,15 +43,15 @@ export class ShouldInstance {
 
         if (!TestConfig.snapshotCalls) { TestConfig.snapshotCalls = [] };
         const { currentTask, snapshotCalls } = TestConfig;
-        
+
         var fileName = path.join(snapshotDir, `${currentTask.className}_snapshots.${TestConfig.snapshotExtension}`);
         var snapshotCall = snapshotCalls.find(w => w.className === currentTask.className);
 
         // we either overwrite existing file or append to it
-        if (snapshotCall == null) {                
+        if (snapshotCall == null) {
             snapshotCall = { className: currentTask.className, content: process.env.UPDATE_SNAPSHOTS ? {} : null, calls: [] };
             snapshotCalls.push(snapshotCall);
-        } 
+        }
 
         // find function
         var call = snapshotCall.calls.find(w => w.name == currentTask.title);
@@ -72,7 +73,7 @@ export class ShouldInstance {
 
             // add current task   
             snapshotCall.content[currentTask.title + ' ' + call.calls] = TestConfig.serializer(this.obj);
-            if (!process.env.SNAPSHOT || currentTask.title.match(process.env.SNAPSHOT)) {    
+            if (!process.env.SNAPSHOT || currentTask.title.match(process.env.SNAPSHOT)) {
                 fs.writeFileSync(fileName, JSON.stringify(snapshotCall.content, null, 2));
             }
             call.calls++
@@ -92,10 +93,10 @@ export class ShouldInstance {
                 if (!snapshotCall.content) {
                     throw new Exception(`Snapshot file for ${currentTask.className} does not exist at '${fileName}'!`);
                 }
-                
+
             }
 
-            const name = currentTask.title + ' ' + call.calls ++;
+            const name = currentTask.title + ' ' + call.calls++;
             let snapshot = snapshotCall.content[name];
 
             if (TestConfig.onProcessSnapshots) {
@@ -103,7 +104,37 @@ export class ShouldInstance {
             }
 
             if (snapshot !== currentValue) {
-                throw new SnapshotException(`Expected ${snapshot} to match ${currentValue}`, snapshot, currentValue, name);
+                // use jsdiff to compare
+                let message = '';
+                var diff = jsdiff.diffChars(snapshot, currentValue);
+                diff.forEach(function (part) {
+                    if (typeof window === 'undefined' || window.location == null || window.location.href == null || window.location.href == 'about:blank') {
+                        if (part.added) {
+                            message += '\x1b[32m' + part.value;
+                        }
+                        else if (part.removed) {
+                            message += '\x1b[31m' + part.value;
+                        }
+                        else if (message) {
+                            message += '\x1b[37m' + part.value.substring(0, 30) + '\n';
+                        } else {
+                            message += '\x1b[37m' + part.value.substring(part.value.length - 30);
+                        }
+                    } else {
+                        if (part.added) {
+                            message += '<span class="diffadded">' + part.value + '</span>';
+                        }
+                        else if (part.removed) {
+                            message += '<span class="diffremoved">' + part.value + '</span>';
+                        }
+                        else if (message) {
+                            message += part.value.substring(0, 30) + '<br />';
+                        } else {
+                            message += part.value.substring(part.value.length - 30);
+                        }
+                    }
+                });
+                throw new SnapshotException(`Snapshots do not match: \n${message}`, snapshot, currentValue, name);
             }
         }
         return this;
