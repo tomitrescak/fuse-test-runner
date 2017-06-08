@@ -47,10 +47,10 @@ export class FuseBoxTestRunner {
     }
 
     public async start() {
-        const tests = FuseBox.import("*.test.js");
         if (this.opts.beforeAll) {
             await this.opts.beforeAll(TestConfig, this);
         }
+        const tests = FuseBox.import("*.test.js");
         return this.startTests(tests);
     }
 
