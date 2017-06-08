@@ -47,10 +47,10 @@ export class FuseBoxTestRunner {
     }
 
     public async start() {
+        const tests = FuseBox.import("*.test.js");
         if (this.opts.beforeAll) {
             await this.opts.beforeAll(TestConfig, this);
         }
-        const tests = FuseBox.import("*.test.js");
         return this.startTests(tests);
     }
 
@@ -154,7 +154,7 @@ export class FuseBoxTestRunner {
                 const hasCallback = this.hasCallback(func);
 
                 if (hasCallback) {
-                    func((error) => {
+                    func.call(obj, (error) => {
                         if (error) {
                             return awaiter.resolveError(error);
                         }
@@ -163,7 +163,7 @@ export class FuseBoxTestRunner {
                 } else {
                     let result;
                     try {
-                        result = func();
+                        result = func.call(obj);
                     } catch (e) {
                         return awaiter.resolveError(e);
                     }
