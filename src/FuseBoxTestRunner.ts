@@ -16,6 +16,11 @@ const $isPromise = (item) => {
         typeof item.catch === 'function';
 }
 
+const $isFunction = (functionToCheck) => {
+    var getType = {};
+    return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+}
+
 export class FuseBoxTestRunner {
     public tasks: any;
     public reporter: Reporter;
@@ -226,13 +231,15 @@ export class FuseBoxTestRunner {
                         fn: this.createEvalFunction(instance, "beforeEach")
                     });
                 }
-                tasks.push({
-                    method: methodName,
-                    title: this.convertToReadableName(methodName),
-                    fn: this.createEvalFunction(instance, methodName),
-                    instance,
-                    cls: obj
-                });
+                if ($isFunction(instance[methodName])) {
+                    tasks.push({
+                        method: methodName,
+                        title: this.convertToReadableName(methodName),
+                        fn: this.createEvalFunction(instance, methodName),
+                        instance,
+                        cls: obj
+                    });
+                }
                 if (instructions["afterEach"]) {
                     tasks.push({
                         method: "afterEach",
