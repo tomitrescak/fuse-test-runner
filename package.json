@@ -28,7 +28,9 @@
     "typescript": "^2.1.5"
   },
   "dependencies": {
+    "@types/node": "^8.0.9",
     "diff": "^3.2.0",
+    "pretty-format": "^20.0.3",
     "realm-utils": "^1.0.7"
   }
 }

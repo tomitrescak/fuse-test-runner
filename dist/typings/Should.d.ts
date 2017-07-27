@@ -1,0 +1,37 @@
+export declare class ShouldInstance {
+    private obj;
+    constructor(obj?: any);
+    mutate(fn: any): this;
+    equal(expected: any): this;
+    notEqual(expected: string): this;
+    notMatch(exp: RegExp): this;
+    stripComments(text: string): string;
+    matchSnapshot(createDiff?: boolean): this;
+    match(exp: RegExp): this;
+    findString(target: string): this;
+    notFindString(target: string): this;
+    okay(): this;
+    haveLength(expected?: number): this;
+    haveLengthGreater(expected: number): this;
+    haveLengthGreaterEqual(expected: number): this;
+    haveLengthLess(expected: number): this;
+    haveLengthLessEqual(expected: number): this;
+    throwException(fn: any): void;
+    deepEqual(expected: any): this;
+    beTrue(): this;
+    beFalse(): this;
+    beString(): this;
+    beArray(): this;
+    beObject(): this;
+    bePlainObject(): this;
+    bePromise(): this;
+    beFunction(): this;
+    beNumber(): this;
+    beBoolean(): this;
+    beUndefined(): this;
+    beMap(): this;
+    beSet(): this;
+    beInstanceOf(obj: any): this;
+    beOkay(): this;
+}
+export declare const should: (obj?: any) => ShouldInstance;
