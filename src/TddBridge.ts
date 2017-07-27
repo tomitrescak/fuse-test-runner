@@ -22,6 +22,10 @@ export function setupBridge() {
     }
   };
 
+  glob.xit = function(name, impl) {};
+
+  glob.xdescribe = function(name, impl) {};
+
   glob.it = function(name, impl: Function) {
     const fullName = describeStack.length > 1 ? `${describeStack.slice(1).join(' > ')} > ${name}` : name;
     exp.prototype[fullName] = impl;
